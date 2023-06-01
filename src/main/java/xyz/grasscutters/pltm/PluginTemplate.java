@@ -5,12 +5,16 @@ import emu.grasscutter.plugin.Plugin;
 import emu.grasscutter.server.event.EventHandler;
 import emu.grasscutter.server.event.HandlerPriority;
 import emu.grasscutter.server.event.player.PlayerJoinEvent;
-
+import emu.grasscutter.utils.JsonUtils;
 import xyz.grasscutters.pltm.commands.*;
 import xyz.grasscutters.pltm.objects.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.stream.Collectors;
+
+import com.google.gson.Gson;
 
 /**
  * The Grasscutter plugin template.
@@ -43,29 +47,28 @@ public final class PluginTemplate extends Plugin {
         
         // Load the configuration.
         try {
-            if(!config.exists() && !config.createNewFile()) {
-                this.getLogger().error("Failed to create config file.");
-            } else {
-                try (FileWriter writer = new FileWriter(config)) {
-                    InputStream configStream = this.getResource("config.json");
-                    if(configStream == null) {
-                        this.getLogger().error("Failed to save default config file.");
-                    } else {
-                        writer.write(new BufferedReader(
-                                new InputStreamReader(configStream)).lines().collect(Collectors.joining("\n"))
-                        ); writer.close();
+        	if (!config.exists() && !config.createNewFile()) {
+    	        this.getLogger().error("Failed to create config file.");
+    	    } else {
+    	        try (FileWriter writer = new FileWriter(config)) {
+    	            InputStream configStream = this.getResource("config.json");
+    	            if (configStream == null) {
+    	                this.getLogger().error("Failed to save default config file.");
+    	            } else {
+    	                writer.write(new BufferedReader(
+    	                        new InputStreamReader(configStream)).lines().collect(Collectors.joining("\n"))
+    	                );writer.close();
 
-                        this.getLogger().info("Saved default config file.");
-                    }
-                }
-            }
-
+    	                this.getLogger().info("Saved default config file.");
+    	            }
+    	        }
+    	    }
             // Put the configuration into an instance of the config class.
-            this.configuration = Grasscutter.getGsonFactory().fromJson(new FileReader(config), PluginConfig.class);
+            this.configuration = JsonUtils.decode(new String(Files.readAllBytes(Paths.get(config.getPath()))), PluginConfig.class);
         } catch (IOException exception) {
             this.getLogger().error("Failed to create config file.", exception);
         }
-        
+
         // Log a plugin status message.
         this.getLogger().info("The example plugin has been loaded.");
     }
@@ -78,7 +81,7 @@ public final class PluginTemplate extends Plugin {
         new EventHandler<>(PlayerJoinEvent.class)
                 .priority(HandlerPriority.LOW)
                 .listener(EventListeners::onJoin)
-                .register();
+                .register(instance);
         
         // Register commands.
         this.getHandle().registerCommand(new ExampleCommand());

@@ -20,8 +20,7 @@ import java.util.List;
  * Other optional fields can be found in the {@link Command} annotation interface.
  */
 
-@Command(label = "example", description = "An example of a plugin command.", 
-        usage = "example <toLog>", permission = "pltm.example")
+@Command(label = "example", usage = "example <toLog>", permission = "pltm.example")
 public final class ExampleCommand implements CommandHandler {
     /**
      * Called when `/example` is run either in-game or on the server console.
